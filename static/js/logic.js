@@ -33,14 +33,6 @@ function createFeatures(earthquakeData) {
 
         return L.circleMarker(latlng, details)
     }
-
-    function colorScale(depth) {
-        const scale = ["#ffffb2", "#b10026"];
-
-        const colScale = d3.scaleLinear().domain([0,200]).range(scale);
-
-        return colScale(depth);
-    }
     
     let earthquakes = L.geoJSON(earthquakeData, {
         onEachFeature: onEachFeature,
@@ -48,6 +40,14 @@ function createFeatures(earthquakeData) {
     });
 
     createMap(earthquakes);
+}
+
+function colorScale(depth) {
+    const scale = ["#ffffb2", "#b10026"];
+
+    const colScale = d3.scaleLinear().domain([-10,100]).range(scale);
+
+    return colScale(depth);
 }
 
 function createMap(earthquakesLayer) {
@@ -75,20 +75,27 @@ function createMap(earthquakesLayer) {
     L.control.layers(baseMaps, overlayMaps).addTo(map);
 
     let legend = L.control({position: 'bottomright'});
-
-    legend.onAdd = function (map) {
+    legend.onAdd = function () {
         let div = L.DomUtil.create('div', 'info legend');
-        let grades = [0, 50, 100, 150, 200];
+        let grades = [-10, 10, 30, 50, 70, 100];
 
+        colors = [
+            colorScale(-10),
+            colorScale(10),
+            colorScale(30),
+            colorScale(50),
+            colorScale(70),
+            colorScale(100),
+        ]
+
+      
         for (let i = 0; i < grades.length; i++) {
             div.innerHTML +=
-                '<i style="background:' + colorScale(grades[i] + 1) + '"></i> ' +
+                '<i style="background:' + colors[i]  + '"></i> ' +
                 grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
         }
-
         return div;
     };
-
-    legend.addTo(earthquakesLayer);
+    legend.addTo(map);
 
 }
